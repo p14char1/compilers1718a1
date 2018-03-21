@@ -1,10 +1,12 @@
-
+import time
 def getchar(words,pos):
-	""" returns char at pos of words, or None if out of bounds """
 
 	if pos<0 or pos>=len(words): return None
-
-	return words[pos]
+	if words[pos]>='0' and words[pos]<='9':
+		return 'number'
+	elif words[pos] == ':' or words[pos] == '.':
+		return 'split'
+	return 'Error'
 	
 
 def scan(text,transition_table,accept_states):
@@ -20,12 +22,27 @@ def scan(text,transition_table,accept_states):
 	while True:
 		
 		c = getchar(text,pos)	# get next char
-		
 		if state in transition_table and c in transition_table[state]:
-		
-			state = transition_table[state][c]	# set new state
-			pos += 1	# advance to next char
-			
+			if state == 'q1' and c=='number':
+				if text[pos-1]<='1' and text[pos-1] >='0':
+					state = transition_table[state][c]	# set new state
+					pos += 1	# advance to next char
+				elif text[pos-1] == '2':
+					if text[pos]<='3' and text[pos]>='0':
+						state = transition_table[state][c]
+						pos+=1
+				else: return 'ERROR_TOKEN',pos
+			elif state=='q1' and c=='split':
+				state = transition_table[state][c]
+				pos+=1
+			elif state == 'q3' and text[pos]>='0' and text[pos]<='5':
+					state = transition_table[state][c]
+					pos+=1
+			elif state=='q0' or state=='q2' or state=='q4':
+				state = transition_table[state][c]
+				pos+=1
+			else:
+				return 'ERROR_TOKEN',pos
 		else:	# no transition found
 
 			# check if current state is accepting
@@ -39,24 +56,18 @@ def scan(text,transition_table,accept_states):
 # the transition table, as a dictionary
 
 # Αντικαταστήστε με το δικό σας λεξικό μεταβάσεων...
-td = { 'q0':{ 't':'q1','l':'q2' },
-       'q1':{ 'e':'q3' },
-       'q2':{ 'o':'q8' },
-       'q3':{ 's':'q4','r':'q6' },
-       'q4':{ 't':'q5' },
-       'q6':{ 'm':'q7' },
-       'q8':{ 'n':'q9' },
-       'q9':{ 'g':'q10'}
+td = { 'q0':{ 'number':'q1' },
+       'q1':{ 'number':'q2','split':'q3' },
+       'q2':{ 'split':'q3' },
+       'q3':{ 'number':'q4' },
+       'q4':{ 'number':'q5' }
      } 
 
 # the dictionary of accepting states and their
 # corresponding token
 
 # Αντικαταστήστε με το δικό σας λεξικό καταστάσεων αποδοχής...
-ad = { 'q5':'TEST_TOKEN',
-       'q7':'TERM_TOKEN',
-       'q10':'LONG_TOKEN'
-     }
+ad = { 'q5':'TIME_TOKEN'  }
 
 
 # get a string from input
@@ -77,3 +88,4 @@ while text:	# that is, while len(text)>0
 	# remaining text for next scan
 	text = text[position:]
 	
+time.sleep(5)
